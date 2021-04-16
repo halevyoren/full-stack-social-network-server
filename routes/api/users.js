@@ -67,7 +67,7 @@ router.post(
         res.status(500).send('Server error');
       }
 
-      // creating returning jsonwebtoken to to the user (frontend)
+      // creating and returning jsonwebtoken to to the user (frontend)
       const payload = {
         user: {
           id: user.id
