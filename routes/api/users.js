@@ -1,7 +1,9 @@
 const express = require('express');
-const { check, validationResult } = require('express-validator');
 const gravatar = require('gravatar');
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const config = require('config');
+const { check, validationResult } = require('express-validator');
 
 const User = require('../../models/User');
 
@@ -34,7 +36,7 @@ router.post(
       let user = await User.findOne({ email });
 
       if (user) {
-        res
+        return res
           .status(400)
           .json({ errors: [{ msg: 'A user with that mail already exists' }] }); // sending error of the same structure as in input error
       }
@@ -65,9 +67,22 @@ router.post(
         res.status(500).send('Server error');
       }
 
-      // returning jsonwebtoken to to the user (frontend)
+      // creating returning jsonwebtoken to to the user (frontend)
+      const payload = {
+        user: {
+          id: user.id
+        }
+      };
 
-      res.send('User registered');
+      jwt.sign(
+        payload,
+        config.get('jwtSecret'),
+        { expiresIn: 3600 },
+        (err, token) => {
+          if (err) throw err;
+          res.json({ token });
+        }
+      );
     } catch (error) {
       console.log(error.message);
       res.status(500).send('Server error');
