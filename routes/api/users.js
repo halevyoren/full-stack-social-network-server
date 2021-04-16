@@ -23,6 +23,7 @@ router.post(
     ).isLength({ min: 4 })
   ],
   async (req, res) => {
+    // checking for errors in the body
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ errors: errors.array() });
@@ -67,7 +68,7 @@ router.post(
         res.status(500).send('Server error');
       }
 
-      // creating and returning jsonwebtoken to to the user (frontend)
+      // creating and returning jsonwebtoken to the user (frontend)
       const payload = {
         user: {
           id: user.id
