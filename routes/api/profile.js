@@ -225,4 +225,72 @@ router.put(
   }
 );
 
+// @route   PUT api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
+router.put('/experience/:exp_id', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user.id });
+
+    //Get index of experience to update
+    const updateIndex = profile.experience
+      .map((exp) => exp.id)
+      .indexOf(req.params.exp_id);
+
+    //extract the fields of the experience from body
+    const {
+      description,
+      location,
+      company,
+      current,
+      title,
+      from,
+      to
+    } = req.body;
+
+    //Create a new experience
+    const newExp = {
+      description,
+      location,
+      company,
+      current,
+      title,
+      from,
+      to
+    };
+
+    profile.experience[updateIndex] = newExp;
+
+    await profile.save();
+
+    res.json(profile);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error.');
+  }
+});
+
+// @route   DELETE api/profile/experience/:exp_id
+// @desc    Delete experience from profile
+// @access  Private
+router.delete('/experience/:exp_id', auth, async (req, res) => {
+  try {
+    const profile = await Profile.findOne({ user: req.user.id });
+
+    //Get remove index
+    const removeIndex = profile.experience
+      .map((exp) => exp.id)
+      .indexOf(req.params.exp_id);
+
+    profile.experience.splice(removeIndex, 1);
+
+    await profile.save();
+
+    res.json(profile);
+  } catch (error) {
+    console.error(error.message);
+    res.status(500).send('Server error.');
+  }
+});
+
 module.exports = router;
