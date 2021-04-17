@@ -111,6 +111,7 @@ router.post(
 // @access  Public
 router.get('/', async (req, res) => {
   try {
+    // getting an array with all the profiles and to each is added the name and avtar of the user
     const allProfiles = await Profile.find().populate('user', [
       'name',
       'avatar'
@@ -165,5 +166,63 @@ router.delete('/', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// @route   PUT api/profile/experience
+// @desc    Add profile exxperience
+// @access  Private
+router.put(
+  '/experience',
+  [
+    auth,
+    [
+      check('title', 'Title is required.').notEmpty(),
+      check('from', 'From date is required.').notEmpty(),
+      check('company', 'Company is required.').notEmpty()
+    ]
+  ],
+  async (req, res) => {
+    // checking for validation errors in the body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
+    //extract the fields of the experience from body
+    const {
+      description,
+      location,
+      company,
+      current,
+      title,
+      from,
+      to
+    } = req.body;
+
+    const newExp = {
+      description,
+      location,
+      company,
+      current,
+      title,
+      from,
+      to
+    };
+
+    try {
+      const profile = await Profile.findOne({ user: req.user.id });
+
+      // push the experience to the begining
+      profile.experience.unshift(newExp);
+
+      // update the profile
+      await profile.save();
+
+      res.json(profile);
+    } catch (error) {
+      console.error(error.message);
+      res.status(500).send('Server error.');
+    }
+  }
+);
 
 module.exports = router;
