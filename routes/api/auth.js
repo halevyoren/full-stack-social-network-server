@@ -10,15 +10,15 @@ const User = require('../../models/User');
 const router = express.Router();
 
 // @route   GET api/auth
-// @desc    Test route
-// @access  Public
+// @desc    Get user by token
+// @access  Private
 router.get('/', auth, async (req, res) => {
   try {
     // Return user (without password)
     const user = await User.findById(req.user.id).select('-password');
     res.json(user);
   } catch (error) {
-    console.log(error.error);
+    console.log(error.message);
     res.status(500).send('Server error');
   }
 });
@@ -77,7 +77,7 @@ router.post(
         }
       );
     } catch (error) {
-      console.log(error.message);
+      console.error(error.message);
       res.status(500).send('Server error');
     }
   }
