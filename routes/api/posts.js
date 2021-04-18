@@ -173,7 +173,6 @@ router.put('/unlike/:post_id', auth, async (req, res) => {
   }
 });
 
-//------------------------------------------------------------------------------------------
 // @route   PUT api/posts/comment/:post_id
 // @desc    Comment on a post
 // @access  Private
@@ -217,7 +216,7 @@ router.put(
   }
 );
 
-// @route   DELETE api/posts/delete/:post_id/:comment_id
+// @route   DELETE api/posts/comment/:post_id/:comment_id
 // @desc    Delete comment
 // @access  Private
 router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
@@ -255,5 +254,63 @@ router.delete('/comment/:post_id/:comment_id', auth, async (req, res) => {
     res.status(500).send('Server error');
   }
 });
+
+// @route   PUT api/posts/comment/:post_id/:comment_id
+// @desc    Update comment
+// @access  Private
+router.put(
+  '/comment/:post_id/:comment_id',
+  [auth, [check('text', 'Text is required.').notEmpty()]],
+  async (req, res) => {
+    // checking for validation errors in the body
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ msg: errors.array() });
+    }
+    try {
+      //check if post exists
+      const post = await Post.findById(req.params.post_id);
+      const user = await User.findById(req.user.id).select('-password');
+
+      if (!post) {
+        return res.status(404).json({ msg: 'Post not found' });
+      }
+      const postComments = post.comments;
+
+      //check if comment exists in the post and where
+      const updateIndex = postComments
+        .map((comment) => comment.id)
+        .indexOf(req.params.comment_id);
+      if (updateIndex < 0) {
+        return res.status(404).json({ msg: 'Comment not found' });
+      }
+
+      // check if this user wrote the comment
+      if (postComments[updateIndex].user.toString() !== req.user.id) {
+        return res.status(401).json({ msg: 'This is not your comment' });
+      }
+      // creating updated comment
+      const updatedComment = {
+        text: req.body.text,
+        user: req.user.id,
+        name: user.name,
+        avatar: user.avatar
+      };
+
+      // update comment
+      postComments[updateIndex] = updatedComment;
+
+      await post.save();
+
+      res.json(post.comments);
+    } catch (error) {
+      console.error(error.message);
+      if (error.kind === 'ObjectId') {
+        return res.status(404).json({ msg: 'Post or comment not found' });
+      }
+      res.status(500).send('Server error');
+    }
+  }
+);
 
 module.exports = router;
