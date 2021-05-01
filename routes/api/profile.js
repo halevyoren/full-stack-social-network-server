@@ -6,6 +6,7 @@ const { check, validationResult } = require('express-validator');
 const auth = require('../../middleware/auth');
 const Profile = require('../../models/Profile');
 const User = require('../../models/User');
+const Post = require('../../models/Post');
 
 const router = express.Router();
 
@@ -154,7 +155,8 @@ router.get('/user/:user_id', async (req, res) => {
 // @access  Private
 router.delete('/', auth, async (req, res) => {
   try {
-    // @todo - remove user posts
+    // remove user posts
+    await Post.deleteMany({ user: req.user.id });
 
     // remove profile
     await Profile.findOneAndRemove({ user: req.user.id });
@@ -209,6 +211,9 @@ router.put(
       from,
       to
     };
+    if (to && new Date(from) > new Date(to)) {
+      return res.status(400).json({ msg: 'From or to Date is incorrect' });
+    }
 
     try {
       const profile = await Profile.findOne({ user: req.user.id });
@@ -429,7 +434,7 @@ router.get('/github/:username', (req, res) => {
   try {
     //getting the repos (5) of the user in acesnding order from github
     const options = {
-      uri: `https://api.github.com/users/${
+      uri: `https://api/profile/github/${
         req.params.username
       }/repos?per_page=5&sort=created:asc&client_id=${config.get(
         'githubClientId'
