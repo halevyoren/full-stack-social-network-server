@@ -54,7 +54,7 @@ $ npm run build // this will build the server code to es5 js codes and generate 
 
 ### in case you upload your server to a site (e.g heroku)
 
-remember to update the file of [client/package.json](https://github.com/halevyoren/full-stack-blog-client/blob/main/package.json)
+remember to update the file of [client/package.json](https://github.com/halevyoren/full-stack-blog-client-MERN/blob/main/package.json)
 
 ```javascript
  "proxy": "https://your-heroku-app.herokuapp.com"
