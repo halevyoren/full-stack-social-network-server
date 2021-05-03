@@ -43,11 +43,8 @@ router.post(
       }
 
       // get user avatar - gravitar (image)
-      const avatar = gravatar.url(email, {
-        s: '200', // default size
-        r: 'pg', // rating
-        d: 'mm' // default image
-      });
+      const avatar =
+        'http://res.cloudinary.com/dda7iyn5d/image/upload/v1619975279/esxkey1a3kgoh5wm8jwe.jpg';
 
       user = new User({
         name,
@@ -77,7 +74,7 @@ router.post(
 
       jwt.sign(
         payload,
-        process.env.jwtSecret,
+        config.get('jwtSecret'),
         { expiresIn: 3600 },
         (err, token) => {
           if (err) throw err;

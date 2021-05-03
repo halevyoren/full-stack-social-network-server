@@ -74,8 +74,8 @@ remember to update the file of [client/package.json](https://github.com/halevyor
 | "react-moment": "^1.1.1"              | "jsonwebtoken": "^8.5.1"       |
 | "react-redux": "^7.2.3"               | "mongoose": "^5.12.4"          |
 | "react-router-dom": "^5.2.0"          | "request": "^2.88.2"           |
-| "react-scripts": "4.0.3"              |
-| "redux": "^4.0.5"                     |
+| "react-scripts": "4.0.3"              | "multer": "^1.4.2"             |
+| "redux": "^4.0.5"                     | "cloudinary": "^1.25.1",       |
 | "redux-devtools-extension": "^2.13.9" |
 | "redux-thunk": "^2.3.0"               |
 | "uuid": "^8.3.2"                      |

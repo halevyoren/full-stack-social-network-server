@@ -2,7 +2,7 @@
 
 const mongoose = require('mongoose');
 const config = require('config');
-const db = process.env.mongoURI; //getting the mongoURI from the default.json file
+const db = config.get('mongoURI'); //getting the mongoURI from the default.json file
 
 //connecting to mongoDB
 const connectDB = async () => {

@@ -1,7 +1,10 @@
 const express = require('express');
 const request = require('request');
 const config = require('config');
-const { check, validationResult } = require('express-validator');
+const { check, validationResult, body } = require('express-validator');
+
+const multer = require('multer');
+const { cloudinary } = require('../../utils/cloudinary');
 
 const auth = require('../../middleware/auth');
 const Profile = require('../../models/Profile');
@@ -9,6 +12,8 @@ const User = require('../../models/User');
 const Post = require('../../models/Post');
 
 const router = express.Router();
+
+const upload = multer();
 
 // @route   GET api/profile/me
 // @desc    Get current user's profile
@@ -37,6 +42,7 @@ router.get('/me', auth, async (req, res) => {
 router.post(
   '/',
   [
+    upload.single('file'),
     auth,
     [
       check('status', 'Status is required.').notEmpty(),
@@ -63,9 +69,9 @@ router.post(
       facebook,
       twitter,
       instagram,
-      linkedin
+      linkedin,
+      image
     } = req.body;
-
     // build profile object
     const profileFields = {};
     profileFields.user = req.user.id;
@@ -89,6 +95,16 @@ router.post(
     try {
       let profile = await Profile.findOne({ user: req.user.id });
 
+      if (image) {
+        let avatar;
+        const CloudinaryResponse = await cloudinary.uploader.upload(image);
+        avatar = CloudinaryResponse.url;
+        const user = await User.findOneAndUpdate(
+          { _id: req.user.id },
+          { avatar: avatar }
+        );
+      }
+
       //if there is a profile than update it, otherwise create it
       if (profile) {
         profile = await Profile.findOneAndUpdate(
@@ -100,6 +116,7 @@ router.post(
       }
 
       profile = new Profile(profileFields);
+
       await profile.save();
       res.json(profile);
     } catch (error) {
